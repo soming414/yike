@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>微信分享测试页面</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            color: #666;
+            font-size: 16px;
+        }
+        
+        .wechat-icon {
+            font-size: 60px;
+            color: #07c160;
+            margin-bottom: 20px;
+        }
+        
+        .steps {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .step {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+        
+        .step:last-child {
+            margin-bottom: 0;
+        }
+        
+        .step-number {
+            background: #667eea;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+        
+        .step-content h3 {
+            color: #333;
+            margin-bottom: 5px;
+            font-size: 18px;
+        }
+        
+        .step-content p {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        .test-buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            flex: 1;
+            min-width: 180px;
+            padding: 15px 25px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: #07c160;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #06ae56;
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+        }
+        
+        .btn-tertiary {
+            background: #f8f9fa;
+            color: #333;
+            border: 2px solid #dee2e6;
+        }
+        
+        .btn-tertiary:hover {
+            background: #e9ecef;
+        }
+        
+        .share-preview {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 30px;
+            display: none;
+        }
+        
+        .share-preview.show {
+            display: block;
+        }
+        
+        .share-preview h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        
+        .preview-card {
+            display: flex;
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            align-items: center;
+        }
+        
+        .preview-image {
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            background: #667eea;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+        
+        .preview-content {
+            flex: 1;
+        }
+        
+        .preview-title {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .preview-description {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        
+        .preview-url {
+            color: #667eea;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+        
+        .note {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+            color: #856404;
+            font-size: 14px;
+        }
+        
+        .note strong {
+            color: #856404;
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .test-buttons {
+                flex-direction: column;
+            }
+            
+            .btn {
+                min-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="wechat-icon">
+                <i class="fab fa-weixin"></i>
+            </div>
+            <h1>微信分享测试</h1>
+            <p>验证您的会员系统在微信中的分享效果</p>
+        </div>
+        
+        <div class="steps">
+            <div class="step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <h3>部署到EdgeOne Pages</h3>
+                    <p>按照部署指南将项目上传到腾讯云EdgeOne Pages，获得HTTPS链接</p>
+                </div>
+            </div>
+            
+            <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <h3>复制HTTPS链接</h3>
+                    <p>从EdgeOne Pages控制台复制您的网站HTTPS链接</p>
+                </div>
+            </div>
+            
+            <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <h3>在微信中测试分享</h3>
+                    <p>将链接发送到微信，查看分享卡片显示效果</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="test-buttons">
+            <button class="btn btn-primary" onclick="testShare()">
+                <i class="fas fa-share-alt"></i> 测试分享效果
+            </button>
+            <button class="btn btn-secondary" onclick="window.open('index.html', '_blank')">
+                <i class="fas fa-eye"></i> 查看前台页面
+            </button>
+            <button class="btn btn-tertiary" onclick="window.open('admin.html', '_blank')">
+                <i class="fas fa-cogs"></i> 查看后台管理
+            </button>
+        </div>
+        
+        <div class="share-preview" id="sharePreview">
+            <h3>微信分享预览效果</h3>
+            <div class="preview-card">
+                <div class="preview-image"></div>
+                <div class="preview-content">
+                    <div class="preview-title">亦可交友平台 - 会员展示系统</div>
+                    <div class="preview-description">真诚交友会员展示系统，为您寻找合适的伴侣。男女会员分开展示，点击卡片查看详细信息。</div>
+                    <div class="preview-url">https://your-site.edgeone-pages.com</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="note">
+            <strong>重要提示：</strong>
+            <p>1. 微信分享必须使用HTTPS链接（HTTP链接无法正常显示分享卡片）</p>
+            <p>2. 首次分享可能需要等待几分钟让微信抓取页面信息</p>
+            <p>3. 如需更换分享图片，请修改index.html中的og:image链接</p>
+            <p>4. 建议使用400×400像素的正方形图片作为分享缩略图</p>
+        </div>
+    </div>
+    
+    <script>
+        function testShare() {
+            const preview = document.getElementById('sharePreview');
+            preview.classList.add('show');
+            
+            // 模拟分享效果
+            setTimeout(() => {
+                alert('分享测试完成！\n\n在微信中，您的分享会显示：\n- 标题：亦可交友平台 - 会员展示系统\n- 描述：真诚交友会员展示系统...\n- 缩略图：心形图案\n- 链接：您的EdgeOne Pages链接');
+            }, 500);
+        }
+        
+        // 自动显示EdgeOne Pages部署提示
+        window.onload = function() {
+            const hasEdgeOneLink = window.location.href.includes('edgeone-pages.com');
+            if (!hasEdgeOneLink) {
+                setTimeout(() => {
+                    alert('温馨提示：\n\n请先按照部署指南将项目上传到腾讯云EdgeOne Pages，获得HTTPS链接后再进行微信分享测试。');
+                }, 1000);
+            }
+        };
+    </script>
+    
+    <!-- 图标库 -->
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+</body>
+</html>
