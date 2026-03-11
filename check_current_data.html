@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>当前数据状态检查</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .status-box {
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .status-warning {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            color: #856404;
+        }
+        
+        .status-info {
+            background-color: #d1ecf1;
+            border-left: 4px solid #17a2b8;
+            color: #0c5460;
+        }
+        
+        .status-success {
+            background-color: #d4edda;
+            border-left: 4px solid #28a745;
+            color: #155724;
+        }
+        
+        .steps {
+            margin: 20px 0;
+        }
+        
+        .step {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+        
+        .step-number {
+            background-color: #007bff;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            flex-shrink: 0;
+            font-weight: bold;
+        }
+        
+        .step-content {
+            flex: 1;
+        }
+        
+        .step-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .step-desc {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            margin: 5px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .btn:hover {
+            background-color: #0056b3;
+        }
+        
+        .btn-success {
+            background-color: #28a745;
+        }
+        
+        .btn-success:hover {
+            background-color: #218838;
+        }
+        
+        .btn-warning {
+            background-color: #ffc107;
+            color: #212529;
+        }
+        
+        .btn-warning:hover {
+            background-color: #e0a800;
+        }
+        
+        .data-display {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            margin-top: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 13px;
+        }
+        
+        .member-count {
+            font-size: 18px;
+            font-weight: bold;
+            color: #007bff;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 当前数据状态检查</h1>
+        
+        <div class="status-box status-warning">
+            <strong>⚠️ 当前状态：数据未更新</strong>
+            <p>检测到当前 <code>data.js</code> 文件中只包含6个初始会员，<strong>没有</strong>包含Excel表格中的新会员信息。</p>
+        </div>
+        
+        <div class="status-box status-info">
+            <strong>📋 问题分析</strong>
+            <p>你打开本地 <code>index.html</code> 文件看不到Excel表格中的信息，是因为：</p>
+            <ul>
+                <li>Excel表格数据还没有被添加到 <code>data.js</code> 文件中</li>
+                <li>网站显示的数据来自 <code>data.js</code> 文件</li>
+                <li>需要先使用导入工具将Excel数据转换为JavaScript格式</li>
+            </ul>
+        </div>
+        
+        <h2>🚀 解决方案：三步完成数据更新</h2>
+        
+        <div class="steps">
+            <div class="step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <div class="step-title">使用Excel导入工具</div>
+                    <div class="step-desc">
+                        <p>打开 <code>excel_data_importer.html</code> 文件，输入Excel表格中的会员信息。</p>
+                        <button class="btn btn-warning" onclick="openImporter()">打开Excel导入工具</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <div class="step-title">更新data.js文件</div>
+                    <div class="step-desc">
+                        <p>复制生成的代码，替换 <code>data.js</code> 文件中的 <code>initialMembers</code> 数组。</p>
+                        <button class="btn" onclick="showUpdateInstructions()">查看更新说明</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <div class="step-title">测试网站显示</div>
+                    <div class="step-desc">
+                        <p>重新打开 <code>index.html</code>，检查是否显示所有会员。</p>
+                        <button class="btn btn-success" onclick="testIndex()">测试index.html</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <h2>📊 当前数据概览</h2>
+        <div class="member-count" id="memberCount">正在加载数据...</div>
+        <div class="data-display" id="dataDisplay">
+            <!-- 数据将在这里显示 -->
+        </div>
+        
+        <div style="margin-top: 30px; text-align: center;">
+            <p><strong>需要帮助？</strong></p>
+            <button class="btn" onclick="showQuickGuide()">查看快速操作指南</button>
+            <button class="btn" onclick="runValidation()">运行数据验证</button>
+        </div>
+    </div>
+
+    <script>
+        // 检查当前数据状态
+        function checkCurrentData() {
+            try {
+                // 检查initialMembers是否存在
+                if (typeof initialMembers === 'undefined') {
+                    document.getElementById('memberCount').innerHTML = '❌ 无法读取initialMembers数据';
+                    document.getElementById('dataDisplay').innerHTML = '请在包含data.js的页面运行此检查';
+                    return;
+                }
+                
+                const count = initialMembers.length;
+                document.getElementById('memberCount').innerHTML = `📋 当前会员总数：${count}人`;
+                
+                // 显示会员列表
+                let html = '<strong>当前会员列表：</strong><br><br>';
+                initialMembers.forEach(member => {
+                    html += `👤 ID ${member.id}: ${member.name} (${member.gender === 'male' ? '男' : '女'}, ${member.age}岁)<br>`;
+                    html += `&nbsp;&nbsp;&nbsp;&nbsp;职业：${member.occupation}，地区：${member.currentResidence}<br><br>`;
+                });
+                
+                if (count <= 6) {
+                    html += '<div style="color: #dc3545; font-weight: bold;">⚠️ 提示：只有6个初始会员，没有Excel导入的新会员</div>';
+                }
+                
+                document.getElementById('dataDisplay').innerHTML = html;
+                
+            } catch (error) {
+                document.getElementById('memberCount').innerHTML = '❌ 检查数据时出错';
+                document.getElementById('dataDisplay').innerHTML = '错误信息：' + error.message;
+            }
+        }
+        
+        // 页面加载后自动检查数据
+        window.onload = function() {
+            // 尝试检查数据，如果data.js没有加载，显示提示
+            setTimeout(checkCurrentData, 100);
+        };
+        
+        // 工具函数
+        function openImporter() {
+            window.open('excel_data_importer.html', '_blank');
+        }
+        
+        function showUpdateInstructions() {
+            alert('更新data.js文件步骤：\n\n1. 打开 excel_data_importer.html\n2. 输入所有会员信息\n3. 点击"生成JavaScript代码"\n4. 点击"复制代码"\n5. 用文本编辑器打开 data.js\n6. 找到 "const initialMembers = [" 这一行\n7. 替换整个数组内容\n8. 保存文件');
+        }
+        
+        function testIndex() {
+            window.open('index.html', '_blank');
+        }
+        
+        function showQuickGuide() {
+            window.open('update_data_quick.bat', '_blank');
+        }
+        
+        function runValidation() {
+            alert('数据验证步骤：\n\n1. 在浏览器中打开 index.html\n2. 按F12打开开发者工具\n3. 切换到Console（控制台）标签页\n4. 复制 validate_data.js 中的代码\n5. 粘贴并运行\n6. 查看验证结果和统计数据');
+        }
+        
+        // 如果没有data.js，加载它
+        if (typeof initialMembers === 'undefined') {
+            const script = document.createElement('script');
+            script.src = 'data.js';
+            script.onload = checkCurrentData;
+            script.onerror = function() {
+                document.getElementById('memberCount').innerHTML = '❌ 无法加载data.js文件';
+                document.getElementById('dataDisplay').innerHTML = '请确保data.js文件存在于同一目录下';
+            };
+            document.head.appendChild(script);
+        }
+    </script>
+</body>
+</html>
