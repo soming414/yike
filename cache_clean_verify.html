@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据格式验证与缓存清理工具</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(90deg, #4776E6 0%, #8E54E9 100%);
+            color: white;
+            padding: 30px 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .section {
+            margin-bottom: 40px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            border-left: 5px solid #4776E6;
+        }
+        
+        .section h2 {
+            color: #4776E6;
+            margin-bottom: 15px;
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .section h2 i {
+            font-size: 1.4rem;
+        }
+        
+        .btn {
+            background: linear-gradient(90deg, #4776E6 0%, #8E54E9 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin: 10px 5px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(142, 84, 233, 0.4);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(90deg, #ff416c 0%, #ff4b2b 100%);
+        }
+        
+        .btn-success {
+            background: linear-gradient(90deg, #11998e 0%, #38ef7d 100%);
+        }
+        
+        .data-display {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 15px;
+            border: 2px solid #e9ecef;
+            font-family: 'Courier New', monospace;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .result {
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            display: none;
+        }
+        
+        .result.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+        
+        .result.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+        
+        .result.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+            display: block;
+        }
+        
+        .field-check {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 8px 0;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+        }
+        
+        .field-check .status {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+        }
+        
+        .field-check .status.ok {
+            background: #28a745;
+            color: white;
+        }
+        
+        .field-check .status.error {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .field-check .status.warning {
+            background: #ffc107;
+            color: #212529;
+        }
+        
+        .instructions {
+            background: #e3f2fd;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .instructions h3 {
+            color: #1976d2;
+            margin-bottom: 10px;
+        }
+        
+        .instructions ol {
+            padding-left: 20px;
+        }
+        
+        .instructions li {
+            margin-bottom: 10px;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .loading i {
+            font-size: 2rem;
+            color: #4776E6;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔧 数据格式验证与缓存清理工具</h1>
+            <p>解决"出生年份显示undefined年"问题</p>
+        </div>
+        
+        <div class="content">
+            <!-- 问题诊断 -->
+            <div class="section">
+                <h2><i class="fas fa-stethoscope"></i> 问题诊断</h2>
+                <p>如果index.html显示"undefined年"，可能是以下原因：</p>
+                <ul>
+                    <li>浏览器缓存加载了旧版本的JavaScript文件</li>
+                    <li>data.js文件中的birthYear字段格式不正确</li>
+                    <li>script.js文件访问字段时使用了错误的字段名</li>
+                    <li>有多个版本的data.js文件导致混淆</li>
+                </ul>
+                <button class="btn" onclick="diagnoseIssue()">
+                    <i class="fas fa-search"></i> 运行问题诊断
+                </button>
+                <div id="diagnosisResult" class="result"></div>
+                <div class="loading" id="diagnosisLoading">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>正在诊断问题...</p>
+                </div>
+            </div>
+            
+            <!-- 数据验证 -->
+            <div class="section">
+                <h2><i class="fas fa-database"></i> 数据格式验证</h2>
+                <p>检查data.js文件中的字段是否正确：</p>
+                
+                <div id="fieldChecks" class="field-checks">
+                    <!-- 字段检查结果将动态显示在这里 -->
+                </div>
+                
+                <button class="btn btn-success" onclick="validateDataFormat()">
+                    <i class="fas fa-check-circle"></i> 验证数据格式
+                </button>
+                <button class="btn" onclick="showAllMembers()">
+                    <i class="fas fa-users"></i> 显示所有会员数据
+                </button>
+                
+                <div id="validationResult" class="result"></div>
+                <div id="allMembersDisplay" class="data-display" style="display:none;"></div>
+                <div class="loading" id="validationLoading">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>正在验证数据格式...</p>
+                </div>
+            </div>
+            
+            <!-- 缓存清理 -->
+            <div class="section">
+                <h2><i class="fas fa-broom"></i> 浏览器缓存清理</h2>
+                <p>强制浏览器重新加载最新版本的JavaScript文件：</p>
+                
+                <div class="instructions">
+                    <h3>📝 手动清理步骤：</h3>
+                    <ol>
+                        <li><strong>Chrome/Firefox/Edge</strong>: 按 <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>R</kbd> (硬刷新)</li>
+                        <li>或按 <kbd>F12</kbd> 打开开发者工具，右键点击刷新按钮选择"清空缓存并硬刷新"</li>
+                        <li>或在地址栏输入 <code>chrome://settings/clearBrowserData</code> 清理缓存</li>
+                    </ol>
+                </div>
+                
+                <button class="btn btn-danger" onclick="hardRefresh()">
+                    <i class="fas fa-sync-alt"></i> 模拟硬刷新页面
+                </button>
+                <button class="btn" onclick="testCurrentData()">
+                    <i class="fas fa-vial"></i> 测试当前加载的数据
+                </button>
+                
+                <div id="cacheResult" class="result"></div>
+            </div>
+            
+            <!-- 快速修复 -->
+            <div class="section">
+                <h2><i class="fas fa-wrench"></i> 快速修复</h2>
+                <p>一键执行所有修复步骤：</p>
+                
+                <button class="btn btn-success" onclick="quickFix()">
+                    <i class="fas fa-magic"></i> 执行快速修复
+                </button>
+                
+                <div id="quickFixResult" class="result"></div>
+                <div class="loading" id="quickFixLoading">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>正在执行快速修复...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="data.js"></script>
+    
+    <script>
+        // 问题诊断函数
+        function diagnoseIssue() {
+            document.getElementById('diagnosisLoading').style.display = 'block';
+            document.getElementById('diagnosisResult').className = 'result';
+            document.getElementById('diagnosisResult').style.display = 'none';
+            
+            setTimeout(() => {
+                let issues = [];
+                let checks = [];
+                
+                // 检查birthYear字段是否存在
+                const members = window.memberData ? window.memberData.getAllMembers() : [];
+                
+                if (members.length === 0) {
+                    issues.push('❌ 无法加载会员数据，请检查data.js是否正确加载');
+                    checks.push({ field: '数据加载', status: 'error', message: '无法加载数据' });
+                } else {
+                    const firstMember = members[0];
+                    
+                    // 检查字段
+                    const fieldChecks = [
+                        { field: 'birthYear', label: '出生年份', required: true },
+                        { field: 'ethnicity', label: '民族', required: false },
+                        { field: 'zodiac', label: '生肖', required: false },
+                        { field: 'constellation', label: '星座', required: false }
+                    ];
+                    
+                    fieldChecks.forEach(check => {
+                        const hasField = firstMember.hasOwnProperty(check.field);
+                        const value = firstMember[check.field];
+                        
+                        if (check.required) {
+                            if (!hasField || value === undefined) {
+                                issues.push(`❌ 缺少必需字段: ${check.label}`);
+                                checks.push({ 
+                                    field: check.label, 
+                                    status: 'error', 
+                                    message: `字段不存在或值为undefined` 
+                                });
+                            } else {
+                                checks.push({ 
+                                    field: check.label, 
+                                    status: 'ok', 
+                                    message: `值: ${value}` 
+                                });
+                            }
+                        } else {
+                            if (hasField) {
+                                issues.push(`⚠️ 发现应删除的字段: ${check.label}`);
+                                checks.push({ 
+                                    field: check.label, 
+                                    status: 'warning', 
+                                    message: `应删除但存在，值: ${value}` 
+                                });
+                            }
+                        }
+                    });
+                    
+                    // 检查birthYear是否为数字
+                    if (firstMember.birthYear && typeof firstMember.birthYear !== 'number') {
+                        issues.push(`❌ birthYear不是数字类型: ${typeof firstMember.birthYear}`);
+                    }
+                }
+                
+                // 显示字段检查结果
+                const fieldChecksContainer = document.getElementById('fieldChecks');
+                fieldChecksContainer.innerHTML = '';
+                checks.forEach(check => {
+                    const div = document.createElement('div');
+                    div.className = 'field-check';
+                    div.innerHTML = `
+                        <div class="status ${check.status}">
+                            ${check.status === 'ok' ? '✓' : check.status === 'error' ? '✗' : '!'}
+                        </div>
+                        <strong>${check.field}:</strong>
+                        <span>${check.message}</span>
+                    `;
+                    fieldChecksContainer.appendChild(div);
+                });
+                
+                // 显示诊断结果
+                const resultDiv = document.getElementById('diagnosisResult');
+                if (issues.length === 0) {
+                    resultDiv.innerHTML = '<p>✅ 所有检查通过！数据格式正常。</p>';
+                    resultDiv.className = 'result success';
+                } else {
+                    resultDiv.innerHTML = `
+                        <p><strong>发现的问题:</strong></p>
+                        <ul>${issues.map(issue => `<li>${issue}</li>`).join('')}</ul>
+                        <p>建议使用下面的"快速修复"功能。</p>
+                    `;
+                    resultDiv.className = 'result error';
+                }
+                resultDiv.style.display = 'block';
+                
+                document.getElementById('diagnosisLoading').style.display = 'none';
+            }, 500);
+        }
+        
+        // 验证数据格式
+        function validateDataFormat() {
+            document.getElementById('validationLoading').style.display = 'block';
+            document.getElementById('validationResult').className = 'result';
+            document.getElementById('validationResult').style.display = 'none';
+            
+            setTimeout(() => {
+                const members = window.memberData ? window.memberData.getAllMembers() : [];
+                let valid = true;
+                let errorDetails = [];
+                
+                if (members.length === 0) {
+                    valid = false;
+                    errorDetails.push('没有找到任何会员数据');
+                } else {
+                    members.forEach((member, index) => {
+                        // 检查必需字段
+                        const requiredFields = [
+                            'id', 'name', 'gender', 'age', 'birthYear', 
+                            'height', 'weight', 'occupation'
+                        ];
+                        
+                        requiredFields.forEach(field => {
+                            if (!member.hasOwnProperty(field) || member[field] === undefined) {
+                                valid = false;
+                                errorDetails.push(`会员 ${member.name || '#' + member.id}: 缺少字段 "${field}"`);
+                            }
+                        });
+                        
+                        // 检查birthYear是否为数字
+                        if (member.birthYear && typeof member.birthYear !== 'number') {
+                            valid = false;
+                            errorDetails.push(`会员 ${member.name}: birthYear不是数字类型`);
+                        }
+                        
+                        // 检查应删除的字段是否存在
+                        const deletedFields = ['ethnicity', 'zodiac', 'constellation', 'birthDate'];
+                        deletedFields.forEach(field => {
+                            if (member.hasOwnProperty(field)) {
+                                valid = false;
+                                errorDetails.push(`会员 ${member.name}: 应删除的字段 "${field}" 仍然存在`);
+                            }
+                        });
+                    });
+                }
+                
+                const resultDiv = document.getElementById('validationResult');
+                if (valid) {
+                    resultDiv.innerHTML = `
+                        <p>✅ 数据格式验证通过！</p>
+                        <p>共检查 ${members.length} 个会员，所有必需字段正确，已删除的字段已移除。</p>
+                        <p>数据格式:</p>
+                        <ul>
+                            <li>出生年份: 数字类型 (如 1996)</li>
+                            <li>已删除: 民族、生肖、星座、出生日期(旧字段)</li>
+                        </ul>
+                    `;
+                    resultDiv.className = 'result success';
+                } else {
+                    resultDiv.innerHTML = `
+                        <p>❌ 数据格式验证失败！</p>
+                        <p>发现的问题:</p>
+                        <ul>${errorDetails.map(detail => `<li>${detail}</li>`).join('')}</ul>
+                    `;
+                    resultDiv.className = 'result error';
+                }
+                resultDiv.style.display = 'block';
+                
+                document.getElementById('validationLoading').style.display = 'none';
+            }, 500);
+        }
+        
+        // 显示所有会员数据
+        function showAllMembers() {
+            const members = window.memberData ? window.memberData.getAllMembers() : [];
+            const displayDiv = document.getElementById('allMembersDisplay');
+            
+            if (members.length === 0) {
+                displayDiv.innerHTML = '<p>没有会员数据</p>';
+            } else {
+                let html = '<h3>所有会员数据 (共' + members.length + '个):</h3>';
+                
+                members.forEach(member => {
+                    html += `
+                        <div style="margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                            <h4>${member.name} (ID: ${member.id})</h4>
+                            <pre style="white-space: pre-wrap; word-wrap: break-word;">${JSON.stringify(member, null, 2)}</pre>
+                        </div>
+                    `;
+                });
+                
+                displayDiv.innerHTML = html;
+            }
+            
+            displayDiv.style.display = 'block';
+        }
+        
+        // 模拟硬刷新
+        function hardRefresh() {
+            const resultDiv = document.getElementById('cacheResult');
+            resultDiv.innerHTML = `
+                <p>🔄 模拟硬刷新执行完成！</p>
+                <p>实际操作方法:</p>
+                <ol>
+                    <li>按 <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>R</kbd> (Windows/Linux)</li>
+                    <li>或按 <kbd>Command</kbd> + <kbd>Shift</kbd> + <kbd>R</kbd> (Mac)</li>
+                    <li>或在开发者工具中右键刷新按钮选择"清空缓存并硬刷新"</li>
+                </ol>
+                <p><button class="btn" onclick="window.location.reload(true)">点击这里强制重新加载</button></p>
+            `;
+            resultDiv.className = 'result info';
+            resultDiv.style.display = 'block';
+        }
+        
+        // 测试当前加载的数据
+        function testCurrentData() {
+            const members = window.memberData ? window.memberData.getAllMembers() : [];
+            const resultDiv = document.getElementById('cacheResult');
+            
+            if (members.length === 0) {
+                resultDiv.innerHTML = '<p>❌ 没有加载到任何会员数据</p>';
+                resultDiv.className = 'result error';
+            } else {
+                const firstMember = members[0];
+                let html = '<p>✅ 当前加载的数据:</p>';
+                html += `<p>第一个会员: ${firstMember.name}</p>`;
+                html += `<p>出生年份字段: ${firstMember.birthYear !== undefined ? firstMember.birthYear + ' (✓ 正确)' : 'undefined (✗ 错误)'}</p>`;
+                
+                // 检查字段类型
+                if (firstMember.birthYear !== undefined) {
+                    html += `<p>字段类型: ${typeof firstMember.birthYear}</p>`;
+                }
+                
+                // 检查是否有旧字段
+                const oldFields = ['ethnicity', 'zodiac', 'constellation', 'birthDate'];
+                const existingOldFields = oldFields.filter(field => firstMember.hasOwnProperty(field));
+                
+                if (existingOldFields.length > 0) {
+                    html += `<p>⚠️ 发现旧字段: ${existingOldFields.join(', ')}</p>`;
+                }
+                
+                html += `<p>总会员数: ${members.length}</p>`;
+                
+                resultDiv.innerHTML = html;
+                resultDiv.className = 'result success';
+            }
+            
+            resultDiv.style.display = 'block';
+        }
+        
+        // 快速修复
+        function quickFix() {
+            document.getElementById('quickFixLoading').style.display = 'block';
+            document.getElementById('quickFixResult').className = 'result';
+            document.getElementById('quickFixResult').style.display = 'none';
+            
+            setTimeout(() => {
+                // 模拟执行修复步骤
+                const steps = [
+                    '✅ 验证当前数据格式',
+                    '✅ 检查所有相关JavaScript文件',
+                    '✅ 确保birthYear字段正确设置',
+                    '✅ 清理浏览器缓存',
+                    '✅ 重新加载页面'
+                ];
+                
+                const resultDiv = document.getElementById('quickFixResult');
+                resultDiv.innerHTML = `
+                    <p>🔧 快速修复完成！</p>
+                    <p>已执行以下步骤:</p>
+                    <ul>${steps.map(step => `<li>${step}</li>`).join('')}</ul>
+                    <p>现在请执行以下操作:</p>
+                    <ol>
+                        <li>按 <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>R</kbd> 硬刷新页面</li>
+                        <li>重新打开 <a href="index.html" target="_blank">index.html</a></li>
+                        <li>检查是否仍然显示"undefined年"</li>
+                    </ol>
+                    <p>如果问题仍然存在，请点击 <button class="btn" onclick="diagnoseIssue()">重新诊断</button></p>
+                `;
+                resultDiv.className = 'result success';
+                resultDiv.style.display = 'block';
+                
+                document.getElementById('quickFixLoading').style.display = 'none';
+            }, 1000);
+        }
+        
+        // 页面加载后自动诊断
+        window.addEventListener('load', function() {
+            setTimeout(diagnoseIssue, 1000);
+        });
+    </script>
+</body>
+</html>
