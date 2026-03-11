@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="真诚交友会员系统后台管理 - 管理员专用">
+    
+    <!-- 微信分享优化 -->
+    <meta property="og:title" content="后台管理 - 真诚交友会员系统">
+    <meta property="og:description" content="管理员专用后台，用于管理会员信息和系统设置。">
+    <meta property="og:image" content="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1200&h=630&fit=crop">
+    <meta property="og:url" content="https://your-site.edgeone-pages.com/admin.html">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="亦可交友平台">
+    
+    <title>后台管理 - 真诚交友会员系统</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="admin.css">
+    <link rel="stylesheet" href="admin_login.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- 登录页面 -->
+    <div class="login-container" id="loginContainer">
+        <div class="login-box">
+            <div class="login-header">
+                <i class="fas fa-lock"></i>
+                <h2>管理员登录</h2>
+                <p>请输入密码访问后台管理系统</p>
+            </div>
+            <div class="login-form">
+                <div class="form-group">
+                    <label for="adminPassword">
+                        <i class="fas fa-key"></i> 管理员密码
+                    </label>
+                    <input type="password" id="adminPassword" placeholder="请输入管理员密码" class="form-control">
+                </div>
+                <button class="btn btn-primary btn-block" id="loginBtn">
+                    <i class="fas fa-sign-in-alt"></i> 登录
+                </button>
+                <div class="login-footer">
+                    <a href="index.html" class="back-link">
+                        <i class="fas fa-arrow-left"></i> 返回前台
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 后台管理内容（默认隐藏） -->
+    <div class="admin-container" id="adminContainer" style="display: none;">
+        <!-- 后台管理头部 -->
+        <header class="admin-header">
+            <div class="admin-logo">
+                <i class="fas fa-cogs"></i>
+                <h1>后台管理系统</h1>
+                <span class="admin-subtitle">真诚交友会员管理</span>
+            </div>
+            <div class="admin-nav">
+                <a href="index.html" class="nav-link">
+                    <i class="fas fa-home"></i> 返回首页
+                </a>
+                <button class="nav-link" id="addMemberBtn">
+                    <i class="fas fa-user-plus"></i> 添加会员
+                </button>
+            </div>
+        </header>
+
+        <!-- 管理内容 -->
+        <main class="admin-main">
+            <div class="admin-sidebar">
+                <div class="sidebar-menu">
+                    <button class="menu-item active" data-section="members">
+                        <i class="fas fa-users"></i> 会员管理
+                    </button>
+                    <button class="menu-item" data-section="statistics">
+                        <i class="fas fa-chart-bar"></i> 数据统计
+                    </button>
+                    <button class="menu-item" data-section="settings">
+                        <i class="fas fa-cog"></i> 系统设置
+                    </button>
+                </div>
+                
+                <div class="stats-summary">
+                    <div class="stat-item">
+                        <div class="stat-value" id="totalMembers">0</div>
+                        <div class="stat-label">总会员数</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="maleMembers">0</div>
+                        <div class="stat-label">男生</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="femaleMembers">0</div>
+                        <div class="stat-label">女生</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="admin-content">
+                <!-- 会员管理部分 -->
+                <section class="content-section active" id="membersSection">
+                    <div class="section-header">
+                        <h2><i class="fas fa-users"></i> 会员列表</h2>
+                        <div class="section-actions">
+                            <div class="search-box">
+                                <input type="text" id="searchInput" placeholder="搜索会员姓名...">
+                                <i class="fas fa-search"></i>
+                            </div>
+                            <button class="btn btn-primary" id="filterBtn">
+                                <i class="fas fa-filter"></i> 筛选
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="members-table-container">
+                        <table class="members-table" id="membersTable">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>姓名</th>
+                                    <th>性别</th>
+                                    <th>年龄</th>
+                                    <th>职业</th>
+                                    <th>现居地</th>
+                                    <th>收入</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="membersTableBody">
+                                <!-- 会员数据将通过JavaScript动态加载 -->
+                                <tr>
+                                    <td colspan="8" class="loading-cell">
+                                        <i class="fas fa-spinner fa-spin"></i> 正在加载会员数据...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- 数据统计部分 -->
+                <section class="content-section" id="statisticsSection">
+                    <div class="section-header">
+                        <h2><i class="fas fa-chart-bar"></i> 数据统计</h2>
+                    </div>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon male">
+                                <i class="fas fa-mars"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3>男女比例</h3>
+                                <div class="gender-chart" id="genderChart">
+                                    <!-- 性别比例图表将通过JavaScript动态生成 -->
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon age">
+                                <i class="fas fa-birthday-cake"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3>年龄分布</h3>
+                                <div class="age-distribution" id="ageDistribution">
+                                    <!-- 年龄分布将通过JavaScript动态生成 -->
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon income">
+                                <i class="fas fa-money-bill-wave"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3>收入分布</h3>
+                                <div class="income-stats" id="incomeStats">
+                                    <!-- 收入统计将通过JavaScript动态生成 -->
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon location">
+                                <i class="fas fa-map-marker-alt"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3>地区分布</h3>
+                                <div class="location-stats" id="locationStats">
+                                    <!-- 地区统计将通过JavaScript动态生成 -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 系统设置部分 -->
+                <section class="content-section" id="settingsSection">
+                    <div class="section-header">
+                        <h2><i class="fas fa-cog"></i> 系统设置</h2>
+                    </div>
+                    
+                    <div class="settings-form">
+                        <div class="form-group">
+                            <label for="siteTitle">
+                                <i class="fas fa-heading"></i> 网站标题
+                            </label>
+                            <input type="text" id="siteTitle" value="真诚交友会员展示系统" class="form-control">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="welcomeMessage">
+                                <i class="fas fa-comment-dots"></i> 欢迎信息
+                            </label>
+                            <textarea id="welcomeMessage" class="form-control" rows="3">
+本资料仅用于真诚交友，不涉及隐私与敏感内容。
+遇到喜欢的人会帮忙牵线搭桥，脱单记得来报喜～
+⚠️ 未见面前，切勿发生任何金钱往来！
+                            </textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="contactInfo">
+                                <i class="fas fa-phone-alt"></i> 联系方式
+                            </label>
+                            <input type="text" id="contactInfo" placeholder="请输入您的联系方式" class="form-control">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="uploadLimit">
+                                <i class="fas fa-upload"></i> 图片上传限制
+                            </label>
+                            <div class="input-with-unit">
+                                <input type="number" id="uploadLimit" value="5" min="1" max="20" class="form-control">
+                                <span class="unit">MB</span>
+                            </div>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button class="btn btn-primary" id="saveSettings">
+                                <i class="fas fa-save"></i> 保存设置
+                            </button>
+                            <button class="btn btn-secondary" id="resetSettings">
+                                <i class="fas fa-redo"></i> 恢复默认
+                            </button>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- 添加/编辑会员模态框 -->
+    <div class="modal-overlay" id="editMemberModal">
+        <div class="modal-content edit-modal">
+            <button class="modal-close" id="closeEditModal">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="modal-header">
+                <h3><i class="fas fa-user-edit"></i> <span id="modalTitle">添加新会员</span></h3>
+            </div>
+            <div class="modal-body">
+                <form id="memberForm">
+                    <div class="form-row">
+                        <div class="form-group half">
+                            <label for="memberName">
+                                <i class="fas fa-user"></i> 姓名 *
+                            </label>
+                            <input type="text" id="memberName" required class="form-control">
+                        </div>
+                        <div class="form-group half">
+                            <label for="memberGender">
+                                <i class="fas fa-venus-mars"></i> 性别 *
+                            </label>
+                            <select id="memberGender" required class="form-control">
+                                <option value="male">男生</option>
+                                <option value="female">女生</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group half">
+                            <label for="memberAge">
+                                <i class="fas fa-birthday-cake"></i> 年龄 *
+                            </label>
+                            <input type="number" id="memberAge" min="18" max="60" required class="form-control">
+                        </div>
+                        <div class="form-group half">
+                            <label for="memberBirthYear">
+                                <i class="fas fa-calendar"></i> 出生年份 *
+                            </label>
+                            <input type="number" id="memberBirthYear" min="1960" max="2006" value="1998" required class="form-control">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group half">
+                            <label for="memberHeight">
+                                <i class="fas fa-ruler-vertical"></i> 身高 (cm) *
+                            </label>
+                            <input type="number" id="memberHeight" min="140" max="210" required class="form-control">
+                        </div>
+                        <div class="form-group half">
+                            <label for="memberWeight">
+                                <i class="fas fa-weight"></i> 体重 (kg) *
+                            </label>
+                            <input type="number" id="memberWeight" min="35" max="150" step="0.1" required class="form-control">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group half">
+                            <label for="memberHometown">
+                                <i class="fas fa-home"></i> 籍贯 *
+                            </label>
+                            <input type="text" id="memberHometown" required class="form-control">
+                        </div>
+                        <div class="form-group half">
+                            <label for="memberCurrentResidence">
+                                <i class="fas fa-map-marker-alt"></i> 现居地 *
+                            </label>
+                            <input type="text" id="memberCurrentResidence" required class="form-control">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group half">
+                            <label for="memberEducation">
+                                <i class="fas fa-graduation-cap"></i> 学历 *
+                            </label>
+                            <select id="memberEducation" required class="form-control">
+                                <option value="高中">高中</option>
+                                <option value="大专">大专</option>
+                                <option value="本科">本科</option>
+                                <option value="硕士">硕士</option>
+                                <option value="博士">博士</option>
+                            </select>
+                        </div>
+                        <div class="form-group half">
+                            <label for="memberOccupation">
+                                <i class="fas fa-briefcase"></i> 职业 *
+                            </label>
+                            <input type="text" id="memberOccupation" required class="form-control">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group half">
+                            <label for="memberMonthlyIncome">
+                                <i class="fas fa-money-bill-wave"></i> 月收入 (元) *
+                            </label>
+                            <input type="number" id="memberMonthlyIncome" min="0" required class="form-control">
+                        </div>
+                        <div class="form-group half">
+                            <label for="memberAcceptLongDistance">
+                                <i class="fas fa-plane"></i> 接受异地恋 *
+                            </label>
+                            <select id="memberAcceptLongDistance" required class="form-control">
+                                <option value="接受">接受</option>
+                                <option value="不接受">不接受</option>
+                                <option value="视情况而定">视情况而定</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="memberSelfIntroduction">
+                            <i class="fas fa-comment-dots"></i> 自我介绍 *
+                        </label>
+                        <textarea id="memberSelfIntroduction" required class="form-control" rows="3" placeholder="请简要介绍自己..."></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="memberPreferredType">
+                            <i class="fas fa-heart"></i> 喜欢类型 *
+                        </label>
+                        <textarea id="memberPreferredType" required class="form-control" rows="2" placeholder="请描述你喜欢的类型..."></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="memberAvatar">
+                            <i class="fas fa-image"></i> 头像链接 *
+                        </label>
+                        <input type="url" id="memberAvatar" required class="form-control" placeholder="https://example.com/avatar.jpg">
+                        <small class="form-text">请提供一个可公开访问的图片链接</small>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" id="cancelEdit">
+                            取消
+                        </button>
+                        <button type="submit" class="btn btn-primary" id="saveMember">
+                            <i class="fas fa-save"></i> 保存会员
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 登录成功动画 -->
+    <div class="login-success" id="loginSuccess">
+        <div class="success-box">
+            <i class="fas fa-check-circle"></i>
+            <h3>登录成功！</h3>
+            <p>正在进入后台管理系统...</p>
+        </div>
+    </div>
+
+    <script src="data.js"></script>
+    <script src="admin.js"></script>
+    <script src="admin_login.js"></script>
+</body>
+</html>
